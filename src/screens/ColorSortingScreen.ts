@@ -1,7 +1,8 @@
 import { Screen, ScreenId } from '../core/types.ts';
 import { ScreenManager } from '../core/ScreenManager.ts';
 import { audioManager } from '../audio/AudioManager.ts';
-import { ConfettiCelebration } from '../components/Confetti.ts';
+import { ParticleSystem } from '../components/ParticleSystem.ts';
+import { ConfirmModal } from '../components/ConfirmModal.ts';
 
 interface ColorCategory {
   id: 'blue' | 'red' | 'yellow';
@@ -22,7 +23,7 @@ export class ColorSortingScreen implements Screen {
   public readonly id: ScreenId = 'colors';
   private screenManager: ScreenManager;
   private rootElement: HTMLElement | null = null;
-  private confetti: ConfettiCelebration = new ConfettiCelebration();
+  private confetti: ParticleSystem = new ParticleSystem();
 
   private currentRound: number = 1;
   private matchedCount: number = 0;
@@ -32,6 +33,11 @@ export class ColorSortingScreen implements Screen {
   // Rejeição de palma da mão e controle de ponteiro único
   private activePointerId: number | null = null;
   private activeToy: HTMLElement | null = null;
+
+  // Listener para recalcular posições no redimensionamento / rotação
+  private handleResize = () => {
+    requestAnimationFrame(() => this.recalibratePositions());
+  };
 
   /**
    * Cores dos baldes e peças conforme especificação:
@@ -267,8 +273,18 @@ export class ColorSortingScreen implements Screen {
     // Configuração de botões superiores
     const btnBack = gameEl.querySelector('#btnBackToHubColors');
     btnBack?.addEventListener('click', () => {
-      this.clearTimers();
-      this.screenManager.navigateTo('home');
+      audioManager.playPop();
+      ConfirmModal.show({
+        container: this.rootElement || document.body,
+        title: 'Voltar para o Menu?',
+        message: 'Quer escolher outra brincadeira ou continuar aqui?',
+        confirmText: 'Sim, ir ao Menu 🏠',
+        cancelText: 'Continuar Brincando! ▶️',
+        onConfirm: () => {
+          this.clearTimers();
+          this.screenManager.navigateTo('home');
+        }
+      });
     });
 
     const btnRestart = gameEl.querySelector('#btnRestartColors');
@@ -279,8 +295,26 @@ export class ColorSortingScreen implements Screen {
       this.startRound(this.currentRound);
     });
 
+    // Registra listeners de redimensionamento proporcional
+    window.addEventListener('resize', this.handleResize);
+    window.addEventListener('orientationchange', this.handleResize);
+
     // Inicia a primeira rodada
     this.startRound(this.currentRound);
+  }
+
+  /**
+   * Recalibra proporcionalmente as peças na prateleira para evitar desalinhamento após girar a tela
+   */
+  private recalibratePositions(): void {
+    if (!this.rootElement) return;
+    const toys = this.rootElement.querySelectorAll<HTMLElement>('.draggable-toy');
+    toys.forEach(toy => {
+      if (!toy.classList.contains('locked') && !toy.classList.contains('dragging')) {
+        toy.style.transition = 'none';
+        toy.style.transform = 'translate3d(0, 0, 0) scale(1)';
+      }
+    });
   }
 
   /**
@@ -645,6 +679,8 @@ export class ColorSortingScreen implements Screen {
   }
 
   public unmount(): void {
+    window.removeEventListener('resize', this.handleResize);
+    window.removeEventListener('orientationchange', this.handleResize);
     this.clearTimers();
     if (this.rootElement && this.rootElement.parentElement) {
       this.rootElement.parentElement.removeChild(this.rootElement);

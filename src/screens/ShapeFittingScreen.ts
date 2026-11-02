@@ -1,7 +1,8 @@
 import { Screen, ScreenId } from '../core/types.ts';
 import { ScreenManager } from '../core/ScreenManager.ts';
 import { audioManager } from '../audio/AudioManager.ts';
-import { ConfettiCelebration } from '../components/Confetti.ts';
+import { ParticleSystem } from '../components/ParticleSystem.ts';
+import { ConfirmModal } from '../components/ConfirmModal.ts';
 
 interface ShapeData {
   id: 'circle' | 'square' | 'triangle' | 'star';
@@ -15,7 +16,7 @@ export class ShapeFittingScreen implements Screen {
   public readonly id: ScreenId = 'shapes';
   private screenManager: ScreenManager;
   private rootElement: HTMLElement | null = null;
-  private confetti: ConfettiCelebration = new ConfettiCelebration();
+  private confetti: ParticleSystem = new ParticleSystem();
 
   private currentRound: number = 1;
   private matchedCount: number = 0;
@@ -25,6 +26,11 @@ export class ShapeFittingScreen implements Screen {
   // Controle estrito de toque único / rejeição de palma da mão
   private activePointerId: number | null = null;
   private activePiece: HTMLElement | null = null;
+
+  // Listener proporcional para redimensionamento e rotação de tela
+  private handleResize = () => {
+    requestAnimationFrame(() => this.recalibratePositions());
+  };
 
   /**
    * Catálogo de formas geométricas básicas com as cores especificadas:
@@ -159,8 +165,18 @@ export class ShapeFittingScreen implements Screen {
     // Configura botões de navegação e reinício
     const btnBack = gameEl.querySelector('#btnBackToHub');
     btnBack?.addEventListener('click', () => {
-      this.clearTimers();
-      this.screenManager.navigateTo('home');
+      audioManager.playPop();
+      ConfirmModal.show({
+        container: this.rootElement || document.body,
+        title: 'Voltar para o Menu?',
+        message: 'Quer escolher outra brincadeira ou continuar aqui?',
+        confirmText: 'Sim, ir ao Menu 🏠',
+        cancelText: 'Continuar Brincando! ▶️',
+        onConfirm: () => {
+          this.clearTimers();
+          this.screenManager.navigateTo('home');
+        }
+      });
     });
 
     const btnRestart = gameEl.querySelector('#btnRestartShapes');
@@ -171,8 +187,39 @@ export class ShapeFittingScreen implements Screen {
       this.startRound(this.currentRound);
     });
 
+    // Registra listeners de redimensionamento proporcional
+    window.addEventListener('resize', this.handleResize);
+    window.addEventListener('orientationchange', this.handleResize);
+
     // Inicia a primeira rodada
     this.startRound(this.currentRound);
+  }
+
+  /**
+   * Recalcula proporcionalmente as posições das peças e alvos
+   * para nunca quebrar o layout após girar o aparelho ou redimensionar a tela
+   */
+  private recalibratePositions(): void {
+    if (!this.rootElement) return;
+    const pieces = this.rootElement.querySelectorAll<HTMLElement>('.draggable-piece');
+    pieces.forEach(piece => {
+      const shapeId = piece.dataset.shape;
+      if (piece.classList.contains('locked')) {
+        const slot = this.rootElement?.querySelector<HTMLElement>(`#slot-${shapeId}`);
+        if (slot) {
+          piece.style.transition = 'none';
+          piece.style.transform = 'translate3d(0, 0, 0) scale(1)';
+          const originalRect = piece.getBoundingClientRect();
+          const slotRect = slot.getBoundingClientRect();
+          const targetDeltaX = (slotRect.left + slotRect.width / 2) - (originalRect.left + originalRect.width / 2);
+          const targetDeltaY = (slotRect.top + slotRect.height / 2) - (originalRect.top + originalRect.height / 2);
+          piece.style.transform = `translate3d(${targetDeltaX}px, ${targetDeltaY}px, 0) scale(1)`;
+        }
+      } else if (!piece.classList.contains('dragging')) {
+        piece.style.transition = 'none';
+        piece.style.transform = 'translate3d(0, 0, 0) scale(1)';
+      }
+    });
   }
 
   /**
@@ -485,6 +532,8 @@ export class ShapeFittingScreen implements Screen {
   }
 
   public unmount(): void {
+    window.removeEventListener('resize', this.handleResize);
+    window.removeEventListener('orientationchange', this.handleResize);
     this.clearTimers();
     if (this.rootElement && this.rootElement.parentElement) {
       this.rootElement.parentElement.removeChild(this.rootElement);

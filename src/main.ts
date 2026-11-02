@@ -35,10 +35,90 @@ function lockAccidentalInteractions(): void {
     lastTouchEnd = now;
   }, { passive: false });
 
-  // 4. Previne arrasto nativo do navegador para imagens ou texto
+  // 4. Bloqueia totalmente arrasto fantasma nativo do navegador para imagens, links e textos
+  window.ondragstart = () => false;
+  document.ondragstart = () => false;
   document.addEventListener('dragstart', (e: DragEvent) => {
     e.preventDefault();
+    return false;
+  }, { capture: true });
+}
+
+/**
+ * Configuração do botão discreto de Tela Cheia (Fullscreen API)
+ */
+function setupFullscreenToggle(): void {
+  const toggleBtn = document.getElementById('globalFullscreenToggle');
+  const iconEnter = document.getElementById('iconEnterFullscreen');
+  const iconExit = document.getElementById('iconExitFullscreen');
+
+  if (!toggleBtn) return;
+
+  const isFullscreen = (): boolean => {
+    const doc = document as unknown as {
+      fullscreenElement?: Element;
+      webkitFullscreenElement?: Element;
+      msFullscreenElement?: Element;
+    };
+    return !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement);
+  };
+
+  const updateIcons = () => {
+    const active = isFullscreen();
+    if (active) {
+      iconEnter?.classList.add('hidden');
+      iconExit?.classList.remove('hidden');
+      toggleBtn.classList.add('active');
+    } else {
+      iconEnter?.classList.remove('hidden');
+      iconExit?.classList.add('hidden');
+      toggleBtn.classList.remove('active');
+    }
+  };
+
+  toggleBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    audioManager.playPop();
+
+    try {
+      if (!isFullscreen()) {
+        const docEl = document.documentElement as unknown as {
+          requestFullscreen?: () => Promise<void>;
+          webkitRequestFullscreen?: () => Promise<void>;
+          msRequestFullscreen?: () => Promise<void>;
+        };
+
+        if (docEl.requestFullscreen) {
+          await docEl.requestFullscreen();
+        } else if (docEl.webkitRequestFullscreen) {
+          await docEl.webkitRequestFullscreen();
+        } else if (docEl.msRequestFullscreen) {
+          await docEl.msRequestFullscreen();
+        }
+      } else {
+        const doc = document as unknown as {
+          exitFullscreen?: () => Promise<void>;
+          webkitExitFullscreen?: () => Promise<void>;
+          msExitFullscreen?: () => Promise<void>;
+        };
+
+        if (doc.exitFullscreen) {
+          await doc.exitFullscreen();
+        } else if (doc.webkitExitFullscreen) {
+          await doc.webkitExitFullscreen();
+        } else if (doc.msExitFullscreen) {
+          await doc.msExitFullscreen();
+        }
+      }
+    } catch (err) {
+      console.warn('Fullscreen não suportado ou negado pelo usuário/navegador:', err);
+    }
+
+    updateIcons();
   });
+
+  document.addEventListener('fullscreenchange', updateIcons);
+  document.addEventListener('webkitfullscreenchange', updateIcons);
 }
 
 /**
@@ -73,6 +153,7 @@ function setupGlobalSoundButton(): void {
 function bootstrap(): void {
   lockAccidentalInteractions();
   setupGlobalSoundButton();
+  setupFullscreenToggle();
 
   // Alerta ergonômico de orientação horizontal para aparelhos móveis
   const orientationNotice = new OrientationNotice();

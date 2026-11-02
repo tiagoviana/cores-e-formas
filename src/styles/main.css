@@ -28,13 +28,15 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  /* Bloqueio de seleção de texto e callouts móveis */
+  /* Bloqueio de seleção de texto, callouts móveis e arrasto nativo fantasma */
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 
 html, body {
@@ -85,36 +87,49 @@ html, body {
   transform: scale(1.03);
 }
 
-/* Botão Flutuante de Controle de Áudio Global */
-.sound-toggle-btn {
+/* Painel Superior de Ações Rápidas (Tela Cheia e Áudio) */
+.top-floating-controls {
   position: fixed;
-  top: 16px;
-  right: 18px;
-  z-index: 99;
-  width: 52px;
-  height: 52px;
+  top: 14px;
+  right: 16px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-action-btn {
+  width: 48px;
+  height: 48px;
   border-radius: var(--radius-full);
   background: #FFFFFF;
   border: 3px solid #E2E8F0;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: var(--text-dark);
-  transition: transform 0.15s ease, background 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 
-.sound-toggle-btn:hover {
+.top-action-btn:hover {
   transform: scale(1.08);
-  background: #FFFDF5;
+  background: #F8FAFC;
+  border-color: #CBD5E1;
 }
 
-.sound-toggle-btn:active {
+.top-action-btn:active {
   transform: scale(0.92);
 }
 
-.sound-toggle-btn.muted {
+.top-action-btn.active {
+  color: #0077B6;
+  border-color: #90CDF4;
+  background: #EBF8FF;
+}
+
+.top-action-btn.muted {
   color: #A0AEC0;
   border-color: #CBD5E0;
   background: #EDF2F7;
