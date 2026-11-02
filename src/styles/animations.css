@@ -48,6 +48,17 @@
   100% { transform: scale(1); }
 }
 
+@keyframes bucketHoverPulse {
+  0%, 100% { transform: scale(1.06) translateY(-4px); }
+  50% { transform: scale(1.11) translateY(-8px); }
+}
+
+@keyframes starPop {
+  0% { transform: scale(0.6); opacity: 0.4; }
+  60% { transform: scale(1.4); }
+  100% { transform: scale(1.15); opacity: 1; }
+}
+
 @keyframes rotatePhone {
   0%, 100% { transform: rotate(0deg); }
   40%, 60% { transform: rotate(-90deg); }

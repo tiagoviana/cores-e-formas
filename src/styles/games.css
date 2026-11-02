@@ -248,15 +248,111 @@
   font-weight: 700;
 }
 
-/* ----------------- MINIJOGO 2: SEPARAÇÃO DE CORES ----------------- */
-.buckets-board {
+/* ----------------- MINIJOGO 2: SEPARAÇÃO POR CORES (COLOR SORTING) ----------------- */
+.minigame-colors {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Barra de Progresso com Estrelinhas no Cabeçalho */
+.stars-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFFFFF;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: 2px solid #E2E8F0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.star-indicator {
+  font-size: 1.5rem;
+  color: #CBD5E1;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: inline-block;
+  line-height: 1;
+}
+
+.star-indicator.filled {
+  color: #F59E0B;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.65), 0 2px 0 #D97706;
+  animation: starPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* PARTE CENTRAL SUPERIOR: Peças estilizadas (bloquinhos e brinquedos SVG) */
+.toys-central-area {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
+  padding: 8px 0;
+}
+
+.toys-shelf {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  border: 3px solid #E2E8F0;
+  box-shadow: 0 10px 28px rgba(44, 62, 80, 0.06);
+  padding: 14px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(10px, 2.5vw, 24px);
+  width: 100%;
+  min-height: clamp(100px, 17vw, 130px);
+}
+
+.draggable-toy {
+  cursor: grab;
+  touch-action: none;
+  z-index: 20;
+  will-change: transform;
+  transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Estado agarrado: escala 1.15 e sombra evidente */
+.draggable-toy.dragging {
+  cursor: grabbing;
+  z-index: 70;
+  filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.32)) !important;
+  transition: none !important;
+}
+
+.draggable-toy.locked {
+  pointer-events: none;
+  cursor: default;
+}
+
+.toy-card {
+  width: clamp(70px, 12.5vw, 92px);
+  height: clamp(70px, 12.5vw, 92px);
+  background: #F8FAFC;
+  border-radius: var(--radius-md);
+  border: 3px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.draggable-toy:hover .toy-card {
+  transform: scale(1.06);
+  border-color: #CBD5E1;
+}
+
+/* PARTE INFERIOR: 3 Baldes/Cestas Estilizadas (Azul, Vermelho, Amarelo) */
+.buckets-bottom-area {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding-bottom: 8px;
 }
 
 .buckets-container {
@@ -264,34 +360,56 @@
   flex-direction: row;
   justify-content: center;
   align-items: flex-end;
-  gap: clamp(16px, 4vw, 42px);
+  gap: clamp(16px, 4.5vw, 44px);
   width: 100%;
 }
 
 .color-bucket {
   flex: 1;
-  max-width: 220px;
-  min-height: clamp(140px, 26vw, 210px);
+  max-width: 230px;
+  min-height: clamp(140px, 24vw, 195px);
   background: #FFFFFF;
   border-radius: var(--radius-lg);
   border: 4px solid #E2E8F0;
-  padding: 14px 10px;
+  padding: 12px 10px 10px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
   position: relative;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.bucket-red { border-bottom: 8px solid #FF5E7E; }
-.bucket-yellow { border-bottom: 8px solid #FFB800; }
-.bucket-blue { border-bottom: 8px solid #5AC8FA; }
+.bucket-blue {
+  border-bottom: 8px solid #3B82F6;
+}
+.bucket-red {
+  border-bottom: 8px solid #EF4444;
+}
+.bucket-yellow {
+  border-bottom: 8px solid #F59E0B;
+}
+
+/* Feedback Visual: Pulso Leve ao Sobrevoar com o Objeto Correto */
+.bucket-blue.bucket-hover-pulse {
+  border-color: #3B82F6 !important;
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.55), 0 14px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+.bucket-red.bucket-hover-pulse {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.55), 0 14px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+.bucket-yellow.bucket-hover-pulse {
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.55), 0 14px 30px rgba(0, 0, 0, 0.12) !important;
+}
 
 .bucket-visual {
   width: 100%;
-  height: clamp(80px, 15vw, 120px);
+  height: clamp(85px, 15vw, 125px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -301,71 +419,17 @@
   color: #FFFFFF;
   font-size: 0.95rem;
   font-weight: 800;
-  padding: 4px 14px;
+  padding: 4px 16px;
   border-radius: var(--radius-full);
   margin-top: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .bucket-collected-indicator {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--text-muted);
-  margin-top: 4px;
-}
-
-/* Bandeja de Brinquedos Coloridos */
-.color-tray-area {
-  width: 100%;
-  max-width: 960px;
-  margin: 0 auto;
-  padding-bottom: 8px;
-}
-
-.color-tray {
-  background: #FFFFFF;
-  border-radius: var(--radius-lg);
-  border: 3px solid #E2E8F0;
-  box-shadow: 0 8px 24px rgba(44, 62, 80, 0.06);
-  padding: 10px 16px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  min-height: clamp(90px, 16vw, 120px);
-}
-
-.draggable-toy {
-  cursor: grab;
-  touch-action: none;
-  z-index: 20;
-  will-change: transform;
-}
-
-.draggable-toy.dragging {
-  cursor: grabbing;
-  z-index: 50;
-}
-
-.draggable-toy.locked {
-  pointer-events: none;
-  cursor: default;
-}
-
-.toy-card {
-  width: clamp(65px, 12vw, 85px);
-  height: clamp(65px, 12vw, 85px);
-  background: #F8FAFC;
-  border-radius: var(--radius-md);
-  border: 2px solid #E2E8F0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  transition: transform 0.15s ease;
-}
-
-.draggable-toy:hover .toy-card {
-  transform: scale(1.08);
-  border-color: #CBD5E1;
+  margin-top: 2px;
 }
 
 /* ----------------- ADAPTABILIDADE PORTRAIT / PEQUENAS TELAS ----------------- */
