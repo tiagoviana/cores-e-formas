@@ -59,6 +59,15 @@
   100% { transform: scale(1.15); opacity: 1; }
 }
 
+@keyframes fadeOut {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.92); pointer-events: none; }
+}
+
+.fade-out {
+  animation: fadeOut 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
 @keyframes rotatePhone {
   0%, 100% { transform: rotate(0deg); }
   40%, 60% { transform: rotate(-90deg); }

@@ -6,13 +6,31 @@
 export class OrientationNotice {
   private overlay: HTMLElement | null = null;
   private isDismissed: boolean = false;
+  private resizeTimer: number | null = null;
+  private resizeRaf: number | null = null;
 
   public init(): void {
     this.createOverlay();
     this.checkOrientation();
 
-    window.addEventListener('resize', () => this.checkOrientation());
-    window.addEventListener('orientationchange', () => this.checkOrientation());
+    const debouncedCheck = () => {
+      if (this.resizeTimer !== null) {
+        clearTimeout(this.resizeTimer);
+      }
+      if (this.resizeRaf !== null) {
+        cancelAnimationFrame(this.resizeRaf);
+      }
+      // Debounce para aguardar a estabilização das dimensões de tela em navegadores móveis
+      this.resizeTimer = window.setTimeout(() => {
+        this.resizeRaf = requestAnimationFrame(() => {
+          this.checkOrientation();
+          this.resizeRaf = null;
+        });
+      }, 100);
+    };
+
+    window.addEventListener('resize', debouncedCheck);
+    window.addEventListener('orientationchange', debouncedCheck);
   }
 
   private createOverlay(): void {
@@ -49,7 +67,12 @@ export class OrientationNotice {
 
   private checkOrientation(): void {
     if (!this.overlay) return;
-    const isPortrait = window.innerHeight > window.innerWidth && window.innerWidth < 768;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    // Ignora estados transitórios em que dimensões do viewport sejam 0
+    if (w <= 0 || h <= 0) return;
+
+    const isPortrait = h > w && w < 768;
 
     if (isPortrait && !this.isDismissed) {
       this.show();

@@ -22,14 +22,33 @@ export class ShapeFittingScreen implements Screen {
   private matchedCount: number = 0;
   private currentShapes: ShapeData[] = [];
   private nextRoundTimer: number | null = null;
+  private isRoundComplete: boolean = false;
 
   // Controle estrito de toque único / rejeição de palma da mão
   private activePointerId: number | null = null;
   private activePiece: HTMLElement | null = null;
 
-  // Listener proporcional para redimensionamento e rotação de tela
+  // IDs para cancelamento de animações e timers de redimensionamento
+  private resizeRafId: number | null = null;
+  private resizeTimeoutId: number | null = null;
+
+  // Listener proporcional e debounced para redimensionamento e rotação de tela
   private handleResize = () => {
-    requestAnimationFrame(() => this.recalibratePositions());
+    if (this.resizeTimeoutId !== null) {
+      clearTimeout(this.resizeTimeoutId);
+    }
+    if (this.resizeRafId !== null) {
+      cancelAnimationFrame(this.resizeRafId);
+      this.resizeRafId = null;
+    }
+
+    // Debounce de 120ms para aguardar a estabilização do viewport móvel
+    this.resizeTimeoutId = window.setTimeout(() => {
+      this.resizeRafId = requestAnimationFrame(() => {
+        this.recalibratePositions();
+        this.resizeRafId = null;
+      });
+    }, 120);
   };
 
   /**
@@ -201,23 +220,49 @@ export class ShapeFittingScreen implements Screen {
    */
   private recalibratePositions(): void {
     if (!this.rootElement) return;
-    const pieces = this.rootElement.querySelectorAll<HTMLElement>('.draggable-piece');
-    pieces.forEach(piece => {
-      const shapeId = piece.dataset.shape;
-      if (piece.classList.contains('locked')) {
-        const slot = this.rootElement?.querySelector<HTMLElement>(`#slot-${shapeId}`);
-        if (slot) {
-          piece.style.transition = 'none';
-          piece.style.transform = 'translate3d(0, 0, 0) scale(1)';
-          const originalRect = piece.getBoundingClientRect();
-          const slotRect = slot.getBoundingClientRect();
-          const targetDeltaX = (slotRect.left + slotRect.width / 2) - (originalRect.left + originalRect.width / 2);
-          const targetDeltaY = (slotRect.top + slotRect.height / 2) - (originalRect.top + originalRect.height / 2);
-          piece.style.transform = `translate3d(${targetDeltaX}px, ${targetDeltaY}px, 0) scale(1)`;
-        }
-      } else if (!piece.classList.contains('dragging')) {
-        piece.style.transition = 'none';
-        piece.style.transform = 'translate3d(0, 0, 0) scale(1)';
+    const containerRect = this.rootElement.getBoundingClientRect();
+    // Protege contra dimensões temporárias iguais a 0 durante transição de viewport mobile
+    if (containerRect.width <= 0 || containerRect.height <= 0) return;
+
+    const pieces = Array.from(this.rootElement.querySelectorAll<HTMLElement>('.draggable-piece'));
+    const lockedPieces = pieces.filter(p => p.classList.contains('locked'));
+
+    // FASE 1 (Batch Write): Reset temporário dos transforms para leitura das posições originais
+    lockedPieces.forEach(p => {
+      p.style.transition = 'none';
+      p.style.transform = 'translate3d(0, 0, 0) scale(1)';
+    });
+
+    // FASE 2 (Batch Read): Leitura agrupada de retângulos (evita forced reflow / layout thrashing)
+    const pieceOriginalRects = lockedPieces.map(p => p.getBoundingClientRect());
+    const slotCenters = lockedPieces.map(p => {
+      const shapeId = p.dataset.shape;
+      const slot = this.rootElement?.querySelector<HTMLElement>(`#slot-${shapeId}`);
+      if (!slot) return null;
+      const rect = slot.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return null;
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      };
+    });
+
+    // FASE 3 (Batch Write): Aplicação dos novos deslocamentos calculados
+    lockedPieces.forEach((p, i) => {
+      const orig = pieceOriginalRects[i];
+      const slotCenter = slotCenters[i];
+      if (slotCenter && orig.width > 0 && orig.height > 0) {
+        const targetDeltaX = slotCenter.x - (orig.left + orig.width / 2);
+        const targetDeltaY = slotCenter.y - (orig.top + orig.height / 2);
+        p.style.transform = `translate3d(${targetDeltaX}px, ${targetDeltaY}px, 0) scale(1)`;
+      }
+    });
+
+    // Peças não travadas e não em arrasto permanecem alinhadas na bandeja
+    pieces.forEach(p => {
+      if (!p.classList.contains('locked') && !p.classList.contains('dragging')) {
+        p.style.transition = 'none';
+        p.style.transform = 'translate3d(0, 0, 0) scale(1)';
       }
     });
   }
@@ -230,6 +275,8 @@ export class ShapeFittingScreen implements Screen {
    */
   private startRound(roundNum: number): void {
     this.clearTimers();
+    this.isRoundComplete = false;
+    this.removeVictoryBanner();
     this.matchedCount = 0;
     this.activePointerId = null;
     this.activePiece = null;
@@ -314,6 +361,9 @@ export class ShapeFittingScreen implements Screen {
     const shapeId = piece.dataset.shape as ShapeData['id'];
 
     const onPointerDown = (e: PointerEvent) => {
+      // Ignora toques se a rodada já tiver sido concluída
+      if (this.isRoundComplete) return;
+
       // Ignora se a peça já estiver travada/encaixada
       if (piece.classList.contains('locked')) return;
 
@@ -483,9 +533,21 @@ export class ShapeFittingScreen implements Screen {
   }
 
   /**
-   * Vitória e passagem automática para a próxima rodada após 2 segundos
+   * Remove com segurança qualquer banner de celebração do DOM
+   */
+  private removeVictoryBanner(): void {
+    const banners = this.rootElement?.querySelectorAll('.round-complete-banner');
+    banners?.forEach(b => b.remove());
+  }
+
+  /**
+   * Vitória e passagem automática para a próxima rodada após transição suave
    */
   private handleRoundVictory(): void {
+    // Flag de guarda para impedir múltiplos disparos acidentais
+    if (this.isRoundComplete) return;
+    this.isRoundComplete = true;
+
     // Toca fanfarra festiva de vitória
     audioManager.playVictory();
 
@@ -494,24 +556,30 @@ export class ShapeFittingScreen implements Screen {
       this.confetti.trigger(this.rootElement, 2500);
     }
 
-    // Exibe banner de celebração da rodada
-    const board = this.rootElement?.querySelector<HTMLElement>('#shapesBoard');
-    if (board) {
-      const banner = document.createElement('div');
-      banner.className = 'round-complete-banner pop-anim';
-      banner.id = 'roundCompleteBanner';
-      banner.innerHTML = `
-        <h3>🎉 Muito Bem!</h3>
-        <p>Rodada ${this.currentRound} Concluída! ⭐⭐⭐</p>
-      `;
-      board.appendChild(banner);
-    }
+    // Remove qualquer banner anterior e exibe banner de celebração da rodada
+    this.removeVictoryBanner();
 
-    // Avança para a próxima rodada após exatamente 2 segundos
+    const banner = document.createElement('div');
+    banner.className = 'round-complete-banner pop-anim';
+    banner.id = 'shapesVictoryBanner';
+    banner.innerHTML = `
+      <h3>🎉 Muito Bem!</h3>
+      <p>Rodada ${this.currentRound} Concluída! ⭐⭐⭐</p>
+    `;
+    this.rootElement?.appendChild(banner);
+
+    // Temporizador de 2200ms para fade-out da mensagem e transição de estado limpa
     this.nextRoundTimer = window.setTimeout(() => {
-      this.currentRound++;
-      this.startRound(this.currentRound);
-    }, 2000);
+      banner.classList.remove('pop-anim');
+      banner.classList.add('fade-out');
+
+      // Aguarda os 300ms do fade-out CSS para resetar o DOM para a nova rodada
+      window.setTimeout(() => {
+        this.removeVictoryBanner();
+        this.currentRound++;
+        this.startRound(this.currentRound);
+      }, 300);
+    }, 2200);
   }
 
   private shuffle<T>(array: T[]): T[] {
@@ -528,6 +596,15 @@ export class ShapeFittingScreen implements Screen {
       clearTimeout(this.nextRoundTimer);
       this.nextRoundTimer = null;
     }
+    if (this.resizeTimeoutId !== null) {
+      clearTimeout(this.resizeTimeoutId);
+      this.resizeTimeoutId = null;
+    }
+    if (this.resizeRafId !== null) {
+      cancelAnimationFrame(this.resizeRafId);
+      this.resizeRafId = null;
+    }
+    this.removeVictoryBanner();
     this.confetti.stop();
   }
 

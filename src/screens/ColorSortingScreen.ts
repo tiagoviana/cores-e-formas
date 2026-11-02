@@ -29,14 +29,33 @@ export class ColorSortingScreen implements Screen {
   private matchedCount: number = 0;
   private totalItems: number = 6;
   private nextRoundTimer: number | null = null;
+  private isRoundComplete: boolean = false;
 
   // Rejeição de palma da mão e controle de ponteiro único
   private activePointerId: number | null = null;
   private activeToy: HTMLElement | null = null;
 
-  // Listener para recalcular posições no redimensionamento / rotação
+  // IDs para cancelamento de timers e animações de redimensionamento
+  private resizeRafId: number | null = null;
+  private resizeTimeoutId: number | null = null;
+
+  // Listener com debounce para recalcular posições no redimensionamento / rotação
   private handleResize = () => {
-    requestAnimationFrame(() => this.recalibratePositions());
+    if (this.resizeTimeoutId !== null) {
+      clearTimeout(this.resizeTimeoutId);
+    }
+    if (this.resizeRafId !== null) {
+      cancelAnimationFrame(this.resizeRafId);
+      this.resizeRafId = null;
+    }
+
+    // Debounce de 120ms para aguardar a estabilização do viewport do navegador móvel
+    this.resizeTimeoutId = window.setTimeout(() => {
+      this.resizeRafId = requestAnimationFrame(() => {
+        this.recalibratePositions();
+        this.resizeRafId = null;
+      });
+    }, 120);
   };
 
   /**
@@ -308,6 +327,10 @@ export class ColorSortingScreen implements Screen {
    */
   private recalibratePositions(): void {
     if (!this.rootElement) return;
+    const containerRect = this.rootElement.getBoundingClientRect();
+    // Protege contra dimensões temporárias iguais a zero durante giro da tela
+    if (containerRect.width <= 0 || containerRect.height <= 0) return;
+
     const toys = this.rootElement.querySelectorAll<HTMLElement>('.draggable-toy');
     toys.forEach(toy => {
       if (!toy.classList.contains('locked') && !toy.classList.contains('dragging')) {
@@ -318,10 +341,20 @@ export class ColorSortingScreen implements Screen {
   }
 
   /**
+   * Remove com segurança qualquer banner de celebração do DOM
+   */
+  private removeVictoryBanner(): void {
+    const banners = this.rootElement?.querySelectorAll('.round-complete-banner');
+    banners?.forEach(b => b.remove());
+  }
+
+  /**
    * Inicia ou reinicia uma rodada do jogo
    */
   private startRound(roundNum: number): void {
     this.clearTimers();
+    this.isRoundComplete = false;
+    this.removeVictoryBanner();
     this.matchedCount = 0;
     this.activePointerId = null;
     this.activeToy = null;
@@ -388,6 +421,9 @@ export class ColorSortingScreen implements Screen {
     const toyColor = toy.dataset.color as ColorCategory['id'];
 
     const onPointerDown = (e: PointerEvent) => {
+      // Ignora toques se a rodada já tiver sido concluída
+      if (this.isRoundComplete) return;
+
       if (toy.classList.contains('locked')) return;
 
       // Rejeição de múltiplos toques e palma da mão
@@ -599,7 +635,7 @@ export class ColorSortingScreen implements Screen {
     this.updateStarsUI(this.matchedCount);
 
     // Se completou todos os 6 brinquedos, dispara vitória de rodada
-    if (this.matchedCount >= this.totalItems) {
+    if (this.matchedCount >= this.totalItems && !this.isRoundComplete) {
       this.handleRoundVictory();
     }
   }
@@ -631,9 +667,13 @@ export class ColorSortingScreen implements Screen {
   }
 
   /**
-   * Vitória e passagem automática para a próxima rodada após 2 segundos
+   * Vitória e passagem automática para a próxima rodada após transição suave
    */
   private handleRoundVictory(): void {
+    // Flag de guarda para impedir múltiplos disparos acidentais
+    if (this.isRoundComplete) return;
+    this.isRoundComplete = true;
+
     // Toca fanfarra festiva de vitória
     audioManager.playVictory();
 
@@ -642,23 +682,30 @@ export class ColorSortingScreen implements Screen {
       this.confetti.trigger(this.rootElement, 2500);
     }
 
-    // Exibe banner de celebração da rodada
-    const shelf = this.rootElement?.querySelector<HTMLElement>('.toys-central-area');
-    if (shelf) {
-      const banner = document.createElement('div');
-      banner.className = 'round-complete-banner pop-anim';
-      banner.innerHTML = `
-        <h3>🎉 Incrível!</h3>
-        <p>Você separou todas as cores! ⭐⭐⭐</p>
-      `;
-      shelf.appendChild(banner);
-    }
+    // Remove qualquer banner anterior e exibe banner de celebração da rodada
+    this.removeVictoryBanner();
 
-    // Avança para a próxima rodada após 2 segundos
+    const banner = document.createElement('div');
+    banner.className = 'round-complete-banner pop-anim';
+    banner.id = 'colorsVictoryBanner';
+    banner.innerHTML = `
+      <h3>🎉 Incrível!</h3>
+      <p>Você separou todas as cores! ⭐⭐⭐</p>
+    `;
+    this.rootElement?.appendChild(banner);
+
+    // Temporizador de 2200ms para fade-out da mensagem e transição de estado limpa
     this.nextRoundTimer = window.setTimeout(() => {
-      this.currentRound++;
-      this.startRound(this.currentRound);
-    }, 2000);
+      banner.classList.remove('pop-anim');
+      banner.classList.add('fade-out');
+
+      // Aguarda os 300ms do fade-out CSS para resetar o DOM para a nova rodada
+      window.setTimeout(() => {
+        this.removeVictoryBanner();
+        this.currentRound++;
+        this.startRound(this.currentRound);
+      }, 300);
+    }, 2200);
   }
 
   private shuffle<T>(array: T[]): T[] {
@@ -675,6 +722,15 @@ export class ColorSortingScreen implements Screen {
       clearTimeout(this.nextRoundTimer);
       this.nextRoundTimer = null;
     }
+    if (this.resizeTimeoutId !== null) {
+      clearTimeout(this.resizeTimeoutId);
+      this.resizeTimeoutId = null;
+    }
+    if (this.resizeRafId !== null) {
+      cancelAnimationFrame(this.resizeRafId);
+      this.resizeRafId = null;
+    }
+    this.removeVictoryBanner();
     this.confetti.stop();
   }
 
