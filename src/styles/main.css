@@ -1,0 +1,134 @@
+/* ==========================================================================
+   Base Styles, Viewport & Gesture Locking (Cores e Formas - Jogos Infantis)
+   ========================================================================== */
+
+:root {
+  --bg-color: #F7F9FC;
+  --text-dark: #2C3E50;
+  --text-muted: #7F8C8D;
+  --accent-pink: #FF5E7E;
+  --accent-blue: #5AC8FA;
+  --accent-yellow: #FFB800;
+  --accent-green: #4CD964;
+  --accent-purple: #AF52DE;
+  --accent-orange: #FF9500;
+
+  --card-shadow: 0 12px 30px rgba(44, 62, 80, 0.08);
+  --card-shadow-active: 0 6px 15px rgba(44, 62, 80, 0.12);
+  --chunky-border: 4px solid #E2E8F0;
+  --radius-sm: 16px;
+  --radius-md: 24px;
+  --radius-lg: 32px;
+  --radius-full: 9999px;
+
+  --font-family: 'Fredoka', 'Nunito', 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  /* Bloqueio de seleção de texto e callouts móveis */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  /* Suporte a viewport dinâmico em navegadores móveis */
+  width: 100dvw;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: fixed; /* Previne rolagem elástica (rubber-banding) no iOS */
+  
+  /* Bloqueio estrito de gestos de toque nativos (zoom de pinça, scroll) */
+  touch-action: none;
+  background-color: var(--bg-color);
+  color: var(--text-dark);
+  font-family: var(--font-family);
+  font-display: swap;
+}
+
+/* Container Mestre da Aplicação */
+#app {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Área de Telas */
+#screen-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#screen-container.screen-leaving {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+#screen-container.screen-entering {
+  opacity: 0;
+  transform: scale(1.03);
+}
+
+/* Botão Flutuante de Controle de Áudio Global */
+.sound-toggle-btn {
+  position: fixed;
+  top: 16px;
+  right: 18px;
+  z-index: 99;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  background: #FFFFFF;
+  border: 3px solid #E2E8F0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-dark);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.sound-toggle-btn:hover {
+  transform: scale(1.08);
+  background: #FFFDF5;
+}
+
+.sound-toggle-btn:active {
+  transform: scale(0.92);
+}
+
+.sound-toggle-btn.muted {
+  color: #A0AEC0;
+  border-color: #CBD5E0;
+  background: #EDF2F7;
+}
+
+/* Utilitários */
+.hidden {
+  display: none !important;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  outline: none;
+}

@@ -1,0 +1,377 @@
+/* ==========================================================================
+   Components: Hub Cards, Chunky Buttons, Modals & Soundbar
+   ========================================================================== */
+
+/* ----------------- HUB PRINCIPAL ----------------- */
+.hub-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px 16px 32px;
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.hub-header {
+  text-align: center;
+  z-index: 5;
+}
+
+.title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-kids {
+  display: inline-block;
+  background: #E8F4FD;
+  color: #0077B6;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  padding: 4px 14px;
+  border-radius: var(--radius-full);
+  margin-bottom: 2px;
+}
+
+.game-title {
+  font-size: clamp(2rem, 5.5vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.1;
+  text-shadow: 0 4px 0 #E2E8F0;
+  letter-spacing: -0.5px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.word-cores {
+  color: var(--accent-pink);
+  text-shadow: 0 4px 0 #FFCCD5;
+}
+
+.word-e {
+  color: var(--accent-yellow);
+  font-size: 0.85em;
+  text-shadow: 0 4px 0 #FFEAA7;
+}
+
+.word-formas {
+  color: var(--accent-blue);
+  text-shadow: 0 4px 0 #BAE6FD;
+}
+
+.subtitle {
+  font-size: clamp(0.95rem, 2vw, 1.2rem);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Grid de Jogos (Minijogo 1 & 2) */
+.games-grid {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+  gap: 28px;
+  width: 100%;
+  max-width: 960px;
+  margin: auto 0;
+  z-index: 5;
+}
+
+/* Cartões Chunky de Seleção de Jogo */
+.game-card {
+  flex: 1;
+  max-width: 440px;
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  border: 4px solid #EDF2F7;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 36px rgba(44, 62, 80, 0.08), 0 4px 0 #CBD5E0;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+}
+
+.game-card:hover {
+  transform: translateY(-8px);
+  border-color: #D2E3FC;
+  box-shadow: 0 24px 45px rgba(44, 62, 80, 0.12), 0 8px 0 #CBD5E0;
+}
+
+.game-card:active {
+  transform: translateY(2px);
+  box-shadow: 0 6px 15px rgba(44, 62, 80, 0.1), 0 2px 0 #CBD5E0;
+}
+
+.card-shapes {
+  border-bottom: 8px solid var(--accent-pink);
+}
+
+.card-colors {
+  border-bottom: 8px solid var(--accent-blue);
+}
+
+.card-badge {
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  background: #F1F5F9;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+
+.card-illustration {
+  width: 100%;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: clamp(1.3rem, 2.8vw, 1.7rem);
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+.card-desc {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.play-action-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #4CD964 0%, #34C759 100%);
+  color: #FFFFFF;
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 12px 28px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 6px 16px rgba(76, 217, 100, 0.4), 0 3px 0 #28A745;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.game-card:hover .play-action-pill {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(76, 217, 100, 0.5), 0 4px 0 #28A745;
+}
+
+/* Soundbar de Demonstração Web Audio API */
+.hub-soundbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #E2E8F0;
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  z-index: 5;
+  margin-top: 8px;
+}
+
+.soundbar-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.soundbar-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sound-chip {
+  background: #F8FAFC;
+  border: 2px solid #CBD5E1;
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  box-shadow: 0 2px 0 #CBD5E1;
+  transition: transform 0.1s ease, background 0.1s ease;
+}
+
+.sound-chip:hover {
+  background: #FFFFFF;
+  border-color: #94A3B8;
+  transform: translateY(-2px);
+}
+
+.sound-chip:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+/* ----------------- MODAL DE VITÓRIA ----------------- */
+.victory-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(44, 62, 80, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 90;
+  padding: 16px;
+}
+
+.victory-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  padding: 32px 36px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  border: 6px solid #FFD166;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.victory-stars {
+  font-size: 2.4rem;
+  letter-spacing: 4px;
+}
+
+.victory-card h2 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--text-dark);
+}
+
+.victory-card p {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.victory-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-primary-large {
+  background: linear-gradient(135deg, #FF5E7E 0%, #FF3366 100%);
+  color: #FFFFFF;
+  font-size: 1.15rem;
+  font-weight: 800;
+  padding: 14px 24px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 6px 16px rgba(255, 94, 126, 0.4), 0 3px 0 #D81E5B;
+  transition: transform 0.15s ease;
+}
+
+.btn-primary-large:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 6px rgba(255, 94, 126, 0.3);
+}
+
+.btn-secondary-large {
+  background: #F1F5F9;
+  color: var(--text-dark);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: var(--radius-full);
+  border: 2px solid #CBD5E1;
+  transition: transform 0.15s ease;
+}
+
+.btn-secondary-large:active {
+  transform: translateY(2px);
+}
+
+/* ----------------- OVERLAY DE ORIENTAÇÃO ----------------- */
+.orientation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(247, 249, 252, 0.96);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.orientation-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  text-align: center;
+  max-width: 320px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+  border: 4px solid #E2E8F0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.orientation-card h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.orientation-card p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+
+.dismiss-orientation-btn {
+  background: #EDF2F7;
+  color: var(--text-dark);
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  border: 2px solid #CBD5E1;
+}

@@ -1,0 +1,146 @@
+/* ==========================================================================
+   Animations & Lúdico Elements
+   ========================================================================== */
+
+@keyframes floatCloud {
+  0% { transform: translateX(-120px); }
+  100% { transform: translateX(110vw); }
+}
+
+@keyframes bubbleFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-16px) scale(1.05); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bucketJump {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.15, 0.85); }
+  50% { transform: scale(0.95, 1.12); }
+  70% { transform: scale(1.05, 0.96); }
+  100% { transform: scale(1); }
+}
+
+@keyframes rotatePhone {
+  0%, 100% { transform: rotate(0deg); }
+  40%, 60% { transform: rotate(-90deg); }
+}
+
+.cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 100px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cloud::before, .cloud::after {
+  content: '';
+  position: absolute;
+  background: inherit;
+  border-radius: 50%;
+}
+
+.cloud-1 {
+  width: 140px;
+  height: 45px;
+  top: 10%;
+  animation: floatCloud 45s linear infinite;
+}
+.cloud-1::before { width: 50px; height: 50px; top: -25px; left: 25px; }
+.cloud-1::after { width: 65px; height: 65px; top: -35px; right: 25px; }
+
+.cloud-2 {
+  width: 190px;
+  height: 60px;
+  top: 65%;
+  animation: floatCloud 60s linear infinite 15s;
+}
+.cloud-2::before { width: 65px; height: 65px; top: -32px; left: 35px; }
+.cloud-2::after { width: 85px; height: 85px; top: -45px; right: 35px; }
+
+.cloud-3 {
+  width: 110px;
+  height: 38px;
+  top: 35%;
+  animation: floatCloud 38s linear infinite 8s;
+}
+.cloud-3::before { width: 40px; height: 40px; top: -20px; left: 20px; }
+.cloud-3::after { width: 50px; height: 50px; top: -28px; right: 20px; }
+
+.floating-bubble {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bubble-1 {
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle, rgba(90, 200, 250, 0.25) 0%, rgba(90, 200, 250, 0.05) 70%);
+  bottom: 12%;
+  left: 6%;
+  animation: bubbleFloat 5s ease-in-out infinite;
+}
+
+.bubble-2 {
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(circle, rgba(255, 94, 126, 0.2) 0%, rgba(255, 94, 126, 0.05) 70%);
+  top: 18%;
+  right: 8%;
+  animation: bubbleFloat 6.5s ease-in-out infinite 1s;
+}
+
+.bubble-3 {
+  width: 55px;
+  height: 55px;
+  background: radial-gradient(circle, rgba(255, 184, 0, 0.22) 0%, rgba(255, 184, 0, 0.05) 70%);
+  top: 55%;
+  left: 48%;
+  animation: bubbleFloat 4.8s ease-in-out infinite 2s;
+}
+
+/* Animações nos SVGs do menu */
+.anim-float-1 { animation: bounceSlow 3.2s ease-in-out infinite; }
+.anim-float-2 { animation: bounceSlow 3.8s ease-in-out infinite 0.5s; }
+.anim-float-3 { animation: bounceSlow 3.5s ease-in-out infinite 1s; }
+.anim-bounce-ball-1 { animation: bounceSlow 2s ease-in-out infinite; }
+.anim-bounce-ball-2 { animation: bounceSlow 2.4s ease-in-out infinite 0.4s; }
+.anim-bounce-ball-3 { animation: bounceSlow 2.2s ease-in-out infinite 0.8s; }
+
+.pop-anim {
+  animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bucket-jump {
+  animation: bucketJump 0.45s ease;
+}
+
+.fade-in {
+  animation: popIn 0.3s ease forwards;
+}
+
+.rotate-phone-icon {
+  animation: rotatePhone 2.6s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
