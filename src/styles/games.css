@@ -145,10 +145,41 @@
 }
 
 .shape-slot.solved {
-  border-style: solid;
-  border-color: #10B981;
-  background-color: #ECFDF5;
+  border-style: solid !important;
+  border-color: #10B981 !important;
+  background-color: #ECFDF5 !important;
   box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+}
+
+/* Auxílio Visual Nível 1: Moldes com cor semi-transparente correspondente à peça */
+.shape-slot.assist-color-tint {
+  background-color: var(--slot-tint-bg, #E2E8F0);
+  border-color: var(--slot-tint-border, #94A3B8);
+  border-style: dashed;
+}
+.shape-slot.assist-color-tint .slot-silhouette {
+  opacity: 0.85;
+}
+
+/* Auxílio Visual Nível 2: Moldes cinza-claro com contorno tracejado evidente */
+.shape-slot.assist-dashed-gray {
+  background-color: #E2E8F0;
+  border-color: #94A3B8;
+  border-style: dashed;
+}
+.shape-slot.assist-dashed-gray .slot-silhouette {
+  opacity: 0.6;
+}
+
+/* Auxílio Visual Nível 3: Moldes monocromáticos discretos */
+.shape-slot.assist-monochrome {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+  border-style: solid;
+  border-width: 3px;
+}
+.shape-slot.assist-monochrome .slot-silhouette {
+  opacity: 0.45;
 }
 
 .slot-silhouette {
@@ -397,6 +428,15 @@
 .bucket-yellow {
   border-bottom: 8px solid #F59E0B;
 }
+.bucket-green {
+  border-bottom: 8px solid #10B981;
+}
+.bucket-orange {
+  border-bottom: 8px solid #F97316;
+}
+.bucket-purple {
+  border-bottom: 8px solid #8B5CF6;
+}
 
 /* Feedback Visual: Pulso Leve ao Sobrevoar com o Objeto Correto */
 .bucket-blue.bucket-hover-pulse {
@@ -412,6 +452,26 @@
 .bucket-yellow.bucket-hover-pulse {
   border-color: #F59E0B !important;
   box-shadow: 0 0 25px rgba(245, 158, 11, 0.55), 0 14px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+.bucket-green.bucket-hover-pulse {
+  border-color: #10B981 !important;
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.55), 0 14px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+.bucket-orange.bucket-hover-pulse {
+  border-color: #F97316 !important;
+  box-shadow: 0 0 25px rgba(249, 115, 22, 0.55), 0 14px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+.bucket-purple.bucket-hover-pulse {
+  border-color: #8B5CF6 !important;
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.55), 0 14px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+.color-bucket.bucket-hover-pulse {
+  border-color: var(--bucket-color, #3B82F6) !important;
+  box-shadow: 0 0 25px var(--bucket-glow, rgba(59, 130, 246, 0.55)), 0 14px 30px rgba(0, 0, 0, 0.12) !important;
 }
 
 .bucket-visual {

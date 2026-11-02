@@ -376,6 +376,164 @@
   border: 2px solid #CBD5E1;
 }
 
+/* ----------------- HUD DE PROGRESSÃO (NÍVEL & 3 ESTRELAS) ----------------- */
+.hud-center-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.hud-level-pill {
+  background: #E0F2FE;
+  color: #0369A1;
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 3px 14px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.hud-level-stars {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  padding: 4px 14px;
+  border-radius: var(--radius-full);
+  border: 2px solid #E2E8F0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.hud-star {
+  font-size: 1.55rem;
+  color: #CBD5E1;
+  line-height: 1;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hud-star.star-active {
+  color: #F59E0B;
+  text-shadow: 0 0 12px rgba(245, 158, 11, 0.7), 0 2px 0 #D97706;
+  animation: starPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* ----------------- OVERLAY LEVEL UP (1.5 SEGUNDOS) ----------------- */
+.level-up-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(44, 62, 80, 0.4);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1020;
+  pointer-events: none;
+}
+
+.level-up-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  padding: 32px 36px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  border: 6px solid #F59E0B;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.level-up-icon {
+  font-size: 3.2rem;
+  animation: bounceSlow 1.5s ease-in-out infinite;
+}
+
+.level-up-card h2 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--text-dark);
+}
+
+.level-up-card p {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0284C7;
+}
+
+/* ----------------- OVERLAY FINAL: SUPER CAMPEÃO! ----------------- */
+.champion-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(44, 62, 80, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1030;
+  padding: 16px;
+}
+
+.champion-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  padding: 36px 40px;
+  text-align: center;
+  max-width: 460px;
+  width: 100%;
+  border: 7px solid #FFD166;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.champion-trophy {
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.champion-card h2 {
+  font-size: 2.3rem;
+  font-weight: 900;
+  color: var(--text-dark);
+}
+
+.champion-card p {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.btn-champion-continue {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  font-size: 1.25rem;
+  font-weight: 800;
+  padding: 16px 36px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4), 0 3px 0 #047857;
+  transition: transform 0.15s ease;
+  cursor: pointer;
+}
+
+.btn-champion-continue:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3);
+}
+
 /* ----------------- MODAL DE CONFIRMAÇÃO DE SAÍDA (CHILD-PROOFING) ----------------- */
 .confirm-exit-overlay {
   position: fixed;

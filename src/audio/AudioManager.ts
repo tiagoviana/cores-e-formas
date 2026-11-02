@@ -321,6 +321,90 @@ export class AudioManager {
     osc.start(now);
     osc.stop(now + 0.07);
   }
+
+  /**
+   * 6. Som de 'pling' cristalino para preenchimento de estrelas no HUD
+   * Frequência alta pura com harmônicos brilhantes
+   */
+  public playPling(step: number = 0): void {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const now = ctx.currentTime;
+    // Frequências ascendentes para cada estrela que se acende (C6, E6, G6)
+    const pitches = [1046.50, 1318.51, 1567.98];
+    const baseFreq = pitches[Math.min(step, pitches.length - 1)] || 1046.50;
+
+    const osc = ctx.createOscillator();
+    const subOsc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(baseFreq, now);
+
+    subOsc.type = 'triangle';
+    subOsc.frequency.setValueAtTime(baseFreq * 2, now);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.28, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+
+    osc.connect(gain);
+    subOsc.connect(gain);
+    if (this.masterGain) gain.connect(this.masterGain);
+
+    osc.start(now);
+    subOsc.start(now);
+    osc.stop(now + 0.45);
+    subOsc.stop(now + 0.45);
+  }
+
+  /**
+   * 7. Som de 'Level Up' (Acorde musical ascendente alegre e vibrante)
+   * Arpeggio brilhante e triunfante celebrando o avanço de nível
+   */
+  public playLevelUp(): void {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const now = ctx.currentTime;
+    // Sequência rápida ascendente de marimba/sino: C5 -> D5 -> E5 -> G5 -> C6
+    const arpeggio = [
+      { freq: 523.25, time: 0.00, dur: 0.14 },
+      { freq: 587.33, time: 0.09, dur: 0.14 },
+      { freq: 659.25, time: 0.18, dur: 0.14 },
+      { freq: 783.99, time: 0.27, dur: 0.16 },
+      { freq: 1046.50, time: 0.38, dur: 0.70 }
+    ];
+
+    arpeggio.forEach(({ freq, time, dur }) => {
+      const osc = ctx.createOscillator();
+      const harmonic = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      const noteTime = now + time;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, noteTime);
+
+      harmonic.type = 'triangle';
+      harmonic.frequency.setValueAtTime(freq * 2, noteTime);
+
+      gain.gain.setValueAtTime(0.001, noteTime);
+      gain.gain.linearRampToValueAtTime(0.25, noteTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + dur);
+
+      osc.connect(gain);
+      harmonic.connect(gain);
+      if (this.masterGain) gain.connect(this.masterGain);
+
+      osc.start(noteTime);
+      harmonic.start(noteTime);
+      osc.stop(noteTime + dur);
+      harmonic.stop(noteTime + dur);
+    });
+  }
 }
 
 // Exporta uma instância singleton padrão
